@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Fermín Barba · Select Stage</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23000'/><circle cx='35' cy='50' r='28' fill='%2300fff5' opacity='0.9'/><circle cx='65' cy='50' r='28' fill='%23ff00aa' opacity='0.5'/></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=VT323&family=Press+Start+2P&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{cyan:'#00fff5',mag:'#ff00aa',yel:'#ffe600',purple:'#7b00ff'},fontFamily:{hud:['Orbitron','sans-serif'],mono:['"Share Tech Mono"','monospace'],crt:['VT323','monospace'],pixel:['"Press Start 2P"','monospace'],body:['"DM Sans"','sans-serif']}}}}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+
+:root{--cyan:#00fff5;--mag:#ff00aa;--yel:#ffe600;--purple:#7b00ff;--bg:#03020a;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:#03020a;color:#e8e8ff;font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:#000;}
+::-webkit-scrollbar-thumb{background:var(--mag);}
+.scanlines::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,245,0.04) 2px,rgba(0,255,245,0.04) 4px);pointer-events:none;z-index:5;}
+@keyframes crt-flicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:0.7}94%{opacity:1}96%{opacity:0.85}97%{opacity:1}}
+.crt-flicker{animation:crt-flicker 6s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}.blink{animation:blink 1s step-end infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}.float{animation:float 3.5s ease-in-out infinite;}
+@keyframes twinkle{0%,100%{opacity:0.2;transform:scale(1);}50%{opacity:1;transform:scale(1.5);}}.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--d,2s) ease-in-out infinite;}
+.glow-cyan{text-shadow:0 0 10px var(--cyan),0 0 20px var(--cyan),0 0 40px var(--cyan);}
+.glow-mag{text-shadow:0 0 10px var(--mag),0 0 20px var(--mag);}
+.glow-yel{text-shadow:0 0 10px var(--yel),0 0 20px var(--yel),0 0 40px var(--yel);}
+.section-divider{width:100%;height:1px;background:linear-gradient(to right,transparent,var(--cyan),var(--mag),var(--cyan),transparent);box-shadow:0 0 20px var(--cyan);}
+.reveal{opacity:0;transform:translateY(28px);}
+.u-fill{background:repeating-linear-gradient(90deg,var(--yel) 0,var(--yel) 5px,transparent 5px,transparent 9px);animation:ublocks 1.2s linear infinite;}
+@keyframes ublocks{from{background-position:0 0;}to{background-position:14px 0;}}
+.proj-card{transition:transform 0.3s,box-shadow 0.3s,border-color 0.3s;position:relative;overflow:hidden;}
+.proj-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--cyan),var(--mag));transform:scaleX(0);transform-origin:left;transition:transform 0.35s;}
+.proj-card:hover{transform:translateY(-7px);}
+.proj-card:hover::before{transform:scaleX(1);}
+.cbtn{position:relative;overflow:hidden;transition:all 0.3s;}
+.cbtn::before{content:'▶';position:absolute;left:-20px;top:50%;transform:translateY(-50%);color:var(--cyan);transition:left 0.3s;font-size:0.7rem;font-family:'Share Tech Mono',monospace;}
+.cbtn:hover{padding-left:36px!important;border-color:var(--cyan)!important;color:var(--cyan)!important;}
+.cbtn:hover::before{left:12px;}
+.cf-tl,.cf-tr,.cf-bl,.cf-br{position:absolute;width:18px;height:18px;border-color:var(--mag);border-style:solid;}
+.cf-tl{top:-3px;left:-3px;border-width:3px 0 0 3px;}
+.cf-tr{top:-3px;right:-3px;border-width:3px 3px 0 0;}
+.cf-bl{bottom:-3px;left:-3px;border-width:0 0 3px 3px;}
+.cf-br{bottom:-3px;right:-3px;border-width:0 3px 3px 0;}
+.skill-bar-fill{width:0;transition:width 1.4s cubic-bezier(0.25,1,0.5,1);}
+@keyframes gpulse{0%,100%{text-shadow:0 0 30px var(--yel),0 0 60px rgba(255,230,0,0.25);}50%{text-shadow:0 0 50px var(--yel),0 0 100px rgba(255,230,0,0.5);}}
+
+html,body{height:100%;overflow:hidden;}
+body{background:#0a0018;}
+#scene{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+
+/* SKY */
+.sky{position:absolute;inset:0;background:linear-gradient(to bottom,#080014 0%,#180030 22%,#38005a 48%,#720078 68%,#c8006a 80%,#ff5500 90%,#ff9000 95%,#ffd700 100%);}
+
+/* STARS */
+#stars{position:absolute;top:0;left:0;right:0;height:60%;overflow:hidden;pointer-events:none;z-index:1;}
+
+/* SUN */
+.sun{
+  position:absolute;bottom:40%;left:50%;transform:translateX(-50%);
+  width:clamp(140px,28vw,240px);height:clamp(70px,14vw,120px);
+  background:linear-gradient(to bottom,#ffd700,#ff8c00,#ff4400);
+  border-radius:50% 50% 0 0;overflow:hidden;
+  box-shadow:0 0 80px rgba(255,180,0,0.6),0 0 160px rgba(255,80,0,0.3);
+  z-index:2;
+}
+.sun::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    to bottom,
+    transparent 0,transparent 6px,
+    rgba(10,0,24,0.92) 6px,rgba(10,0,24,0.92) 9px,
+    transparent 9px,transparent 18px,
+    rgba(10,0,24,0.92) 18px,rgba(10,0,24,0.92) 22px,
+    transparent 22px,transparent 34px,
+    rgba(10,0,24,0.92) 34px,rgba(10,0,24,0.92) 39px
+  );
+}
+
+/* MOUNTAINS */
+.mtns{position:absolute;bottom:40%;left:0;right:0;z-index:3;}
+
+/* GRID */
+.grid-wrap{position:absolute;bottom:0;left:0;right:0;height:40%;overflow:hidden;perspective:280px;z-index:2;}
+.retro-grid{
+  position:absolute;bottom:0;left:-50%;right:-50%;height:200%;
+  background-image:
+    repeating-linear-gradient(90deg,rgba(255,0,170,0.4) 0,rgba(255,0,170,0.4) 1px,transparent 1px,transparent 48px),
+    repeating-linear-gradient(0deg,rgba(255,0,170,0.4) 0,rgba(255,0,170,0.4) 1px,transparent 1px,transparent 48px);
+  transform:rotateX(75deg);transform-origin:center bottom;
+  animation:gridscroll 2s linear infinite;
+}
+@keyframes gridscroll{from{background-position:0 0,0 0;}to{background-position:0 0,0 -48px;}}
+.glow-line{position:absolute;bottom:40%;left:0;right:0;height:3px;background:linear-gradient(to right,transparent,#ff00aa,#00fff5,#ff00aa,transparent);box-shadow:0 0 20px #00fff5,0 0 40px #ff00aa;z-index:4;}
+.overlay{position:absolute;inset:0;background:rgba(8,0,20,0.2);z-index:4;}
+
+/* MENU */
+.menu-wrap{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:clamp(6px,1.5vh,12px);}
+.menu-title{font-family:'Press Start 2P',monospace;font-size:clamp(0.9rem,3.5vw,1.8rem);color:var(--yel);letter-spacing:4px;text-align:center;margin-bottom:clamp(8px,2vh,20px);}
+.menu-item{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(0.65rem,2.2vw,1rem);
+  color:#ffd700;cursor:pointer;
+  padding:clamp(8px,1.5vh,14px) 0;
+  display:flex;align-items:center;gap:14px;
+  transition:color 0.15s,transform 0.15s;
+  text-decoration:none;
+  letter-spacing:2px;
+  text-shadow:2px 2px 0 rgba(0,0,0,0.9);
+}
+.menu-item:hover{color:#fff;transform:translateX(6px);text-shadow:0 0 20px #ffd700,2px 2px 0 rgba(0,0,0,0.8);}
+.mi-cur{opacity:0;transition:opacity 0.15s;font-size:0.75em;}
+.menu-item:hover .mi-cur{opacity:1;}
+</style>
+</head>
+<body>
+<div id="scene">
+  <div class="sky"></div>
+  <div id="stars"></div>
+  <div class="sun"></div>
+  <div class="mtns">
+    <svg viewBox="0 0 1440 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="width:100%;display:block;">
+      <defs>
+        <linearGradient id="mg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#50006a"/><stop offset="100%" stop-color="#1a0030"/></linearGradient>
+        <linearGradient id="mg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#30004a"/><stop offset="100%" stop-color="#0a0018"/></linearGradient>
+      </defs>
+      <polygon points="0,220 100,70 220,150 360,25 480,110 620,35 740,120 860,45 980,130 1100,55 1240,140 1360,65 1440,100 1440,220" fill="url(#mg2)" opacity="0.75"/>
+      <polygon points="0,220 160,95 280,165 430,55 560,135 690,72 810,155 940,62 1080,145 1220,78 1380,130 1440,105 1440,220" fill="url(#mg1)"/>
+      <polyline points="430,55 560,135 690,72 810,155 940,62" fill="none" stroke="rgba(255,0,170,0.45)" stroke-width="1.5"/>
+      <polyline points="0,220 160,95 280,165 430,55" fill="none" stroke="rgba(255,0,170,0.3)" stroke-width="1"/>
+      <polyline points="940,62 1080,145 1220,78 1440,105" fill="none" stroke="rgba(255,0,170,0.3)" stroke-width="1"/>
+    </svg>
+  </div>
+  <div class="grid-wrap"><div class="retro-grid"></div></div>
+  <div class="glow-line"></div>
+  <div class="overlay"></div>
+
+  <div class="menu-wrap">
+    <h1 class="menu-title" data-es="SELECT STAGE" data-en="SELECT STAGE">SELECT STAGE</h1>
+    <a href="landing.html#proyectos" class="menu-item"><span class="mi-cur">▶</span><span data-es="01  PROYECTOS" data-en="01  PROJECTS">01  PROYECTOS</span></a>
+    <a href="landing.html#skills" class="menu-item"><span class="mi-cur">▶</span><span>02  SKILLS</span></a>
+    <a href="landing.html#sobre-mi" class="menu-item"><span class="mi-cur">▶</span><span data-es="03  SOBRE MÍ" data-en="03  ABOUT ME">03  SOBRE MÍ</span></a>
+    <a href="landing.html#contacto" class="menu-item"><span class="mi-cur">▶</span><span data-es="04  CONTACTO" data-en="04  CONTACT">04  CONTACTO</span></a>
+  </div>
+</div>
+<script>
+
+function makeStars(id,n){
+  const c=document.getElementById(id);if(!c)return;
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=Math.random()*2.5+0.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*3+1.5).toFixed(1)}s;animation-delay:${(Math.random()*3).toFixed(1)}s;`;
+    c.appendChild(s);
+  }
+}
+
+makeStars('stars',70);
+let lang='es';
+function toggleLang(){
+  lang=lang==='es'?'en':'es';
+  document.querySelectorAll('[data-es]').forEach(el=>{const k=lang==='en'?'en':'es';if(el.dataset[k])el.innerHTML=el.dataset[k];});
+}
+// GSAP entrance
+gsap.from('.menu-title',{y:-30,opacity:0,duration:0.8,ease:'power2.out'});
+gsap.from('.menu-item',{x:-40,opacity:0,stagger:0.12,duration:0.6,ease:'power2.out',delay:0.4});
+</script>
+</body>
+</html>
